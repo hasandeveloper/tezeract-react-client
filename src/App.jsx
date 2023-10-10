@@ -1,15 +1,16 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import addTicket from "./Components/addTicket";
-import updateTicket from "./Components/updateTicket";
-import Home from "./Components/Home";
+import Create from "./components/tickets/Create";
+import Update from "./components/tickets/Update";
+import Home from "./components/Home";
 
 const App = () => {
   return (
     <BrowserRouter>
         <Routes>
-            <Route path="/add_ticket" element={addTicket}/>
-            <Route path="/update_ticket" element={updateTicket}/>
-            <Route path="/home" element={Home}/>
+            <Route path="/tickets/create" element={<Create/>}/>
+            <Route path="/tickets/update" element={<Update/>}/>
+            <Route path="/" element={<Home/>}/>
+            <Route path="*" element={<h1>Not found</h1>}/>
         </Routes>
     </BrowserRouter>
   )

@@ -1,9 +1,9 @@
 import React from 'react'
 
-const listTicket = () => {
+const List = () => {
   return (
     <div>listTicket</div>
   )
 }
 
-export default listTicket
+export default List;

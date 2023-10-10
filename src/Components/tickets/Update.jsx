@@ -1,9 +1,9 @@
 import React from 'react'
 
-const updateTicket = () => {
+const Update = () => {
   return (
     <div>updateTicket</div>
   )
 }
 
-export default updateTicket
+export default Update;
