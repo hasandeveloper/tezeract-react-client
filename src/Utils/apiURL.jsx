@@ -4,4 +4,4 @@ export const TICKET_FIELD_URI = "/api/v2/ticket_fields/4398063301247";
 export const CHANNEL_BASE_URL = "https://6524f8c867cfb1e59ce65389.mockapi.io"
 export const CUSTOMERS_URI = "/customers"
 export const ORDERS_URI = "/orders"
-export const TOKEN = ""
+export const TOKEN = "7adc374126ec28a60081e43ef479657bb95207f1b31476f765a307fe96418a9e"

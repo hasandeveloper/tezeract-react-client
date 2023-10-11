@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { CHANNEL_BASE_URL, TICKET_BASE_URL, CUSTOMERS_URI, ORDERS_URI, TICKET_FIELD_URI } from '../../Utils/apiURL';
+import { CHANNEL_BASE_URL, TICKET_BASE_URL, CUSTOMERS_URI, ORDERS_URI, TICKET_FIELD_URI, TOKEN } from '../../Utils/apiURL';
 
 
-const  Create = () => {
+const Create = () => {
   const [customerData, setCustomerData] = useState([]);
   const [orderData, setOrderData] = useState([])
   const [isVisible, setIsVisible] = useState(false)
+
+  const [formData, setFormData] = useState({
+    subject: "",
+    comment: "",
+    priority: "",
+    customer: ""
+  })
 
   useEffect(() => {
         axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}`).then(response => {
@@ -17,24 +24,70 @@ const  Create = () => {
   },[]);
 
   const fetchOrders = (e) => {
-    axios.get(`${CHANNEL_BASE_URL}/${CUSTOMERS_URI}/${e.target.value}${ORDERS_URI}`).then(response => {
-      if(response.status === 200){
-        setOrderData(response.data);
-      }
-    }).catch((e) =>{alert(e)})
+    if(e.target.value === ''){
+      setFormData({
+        ...formData, 
+        [e.target.name]: "",
+      })
+      setIsVisible(false)
+    }else{
+      axios.get(`${CHANNEL_BASE_URL}/${CUSTOMERS_URI}/${e.target.value}${ORDERS_URI}`).then(response => {
+        if(response.status === 200){
+          setOrderData(response.data);
+        }
+      }).catch((e) =>{alert("haha",e)})
+      setFormData({
+        ...formData, 
+        [e.target.name]: e.target.value,
+      })
+      setIsVisible(true)
+    }
 
-    setIsVisible(true)
+  }
+
+  const priorityChange = (e) => {
+    if(e.target.value === ''){
+      setFormData({
+        ...formData, 
+        [e.target.name]: '',
+      })
+    }else{
+      setFormData({
+        ...formData, 
+        [e.target.name]: e.target.value,
+      })
+    }
+  }
+
+  const onChangeHandler = (e) => {
+    setFormData({
+      ...formData, 
+      [e.target.name]: e.target.value,
+    })
   }
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    
-    
     try{
-
       const ticketFieldBody = await
-      axios.get(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`)
-      debugger;
+       axios.get(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`,{
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+      })
+
+     let list = []
+
+     ticketFieldBody.data.ticket_field.custom_field_options.map(customer => {
+      let customerObj = {
+        name: customer.name,
+        value: customer.value
+      }
+
+      list.push(customerObj)
+     })
+
+      debugger
       // axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
       //   "ticket_field": {
       //     "custom_field_options": [
@@ -55,17 +108,18 @@ const  Create = () => {
       <form onSubmit={submitHandler}>
         <div className="mb-3">
           <label htmlFor="subject" className="form-label">Subject</label>
-          <input type="text" className="form-control" id="subject"/>
+          <input type="text" value={formData.subject} className="form-control" onChange={onChangeHandler} name="subject"/>
         </div>
 
         <div className="mb-3">
           <label htmlFor="comment" className="form-label">Comment</label>
-          <input type="text" className="form-control" id="comment"/>
+          <input type="text" value={formData.comment} className="form-control" onChange={onChangeHandler} name="comment" />
         </div>
 
         <div className="mb-3">
         <label htmlFor="priority" className="form-label">Priority</label>
-          <select className="form-select" aria-label="Default select priority" id="priority">
+          <select className="form-select" aria-label="Default select priority" id="priority" value={formData.priority} onChange={priorityChange} name="priority" >
+            <option value=''>Select Priority</option>
             <option value="urgent">Urgent</option>
             <option value="high">High</option>
             <option value="low">Low</option>
@@ -75,7 +129,8 @@ const  Create = () => {
 
         <div className="mb-3">
         <label htmlFor="customer" className="form-label">Customer</label>
-          <select className="form-select" aria-label="Default select customer" id="customer" onChange={fetchOrders}>
+          <select className="form-select" value={formData.customer} aria-label="Default select customer" name="customer" onChange={fetchOrders}>
+          <option value=''>Select Customer</option>
             {customerData.map(customer => {
               return <option value={customer.id}>{customer.name}</option>
             })}           
