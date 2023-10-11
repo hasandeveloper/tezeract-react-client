@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { CHANNEL_BASE_URL } from '../../Utils/apiURL';
-import { CUSTOMERS_URI } from '../../Utils/apiURL';
-import { ORDERS_URI } from '../../Utils/apiURL';
+import { CHANNEL_BASE_URL, TICKET_BASE_URL, CUSTOMERS_URI, ORDERS_URI, TICKET_FIELD_URI } from '../../Utils/apiURL';
+
 
 const  Create = () => {
-  const [customerData,setCustomerData] = useState([]);
+  const [customerData, setCustomerData] = useState([]);
   const [orderData, setOrderData] = useState([])
   const [isVisible, setIsVisible] = useState(false)
 
@@ -15,7 +14,6 @@ const  Create = () => {
             setCustomerData(response.data);
           }
         }).catch((e) =>{alert(e)})
-
   },[]);
 
   const fetchOrders = (e) => {
@@ -28,11 +26,33 @@ const  Create = () => {
     setIsVisible(true)
   }
 
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    
+    
+    try{
+
+      const ticketFieldBody = await
+      axios.get(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`)
+      debugger;
+      // axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
+      //   "ticket_field": {
+      //     "custom_field_options": [
+      //       {"name": "Apple Pie", "value": "apple"},
+      //       {"name": "Pecan Pie", "value": "pecan"}
+      //     ]
+      
+      // }})
+    }catch(error){
+      alert(error)
+    }
+  }
+
   return (
     <div className='container my-4'>
       <h1>Create Ticket</h1>
 
-      <form>
+      <form onSubmit={submitHandler}>
         <div className="mb-3">
           <label htmlFor="subject" className="form-label">Subject</label>
           <input type="text" className="form-control" id="subject"/>
