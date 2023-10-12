@@ -68,6 +68,7 @@ const Create = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    var list = []
     try{
       const ticketFieldBody = await
        axios.get(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`,{
@@ -76,31 +77,55 @@ const Create = () => {
         }
       })
 
-     let list = []
-
-     ticketFieldBody.data.ticket_field.custom_field_options.map(customer => {
-      let customerObj = {
-        name: customer.name,
-        value: customer.value
+      if(ticketFieldBody.status === 200){
+        ticketFieldBody.data.ticket_field.custom_field_options.map(customer => {
+          let customerObj = {
+            name: customer.name,
+            value: customer.value
+          }
+    
+          list.push(customerObj)
+         })
+         updateCustomerDetailInList(list)
       }
-
-      list.push(customerObj)
-     })
-
-      debugger
-      // axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
-      //   "ticket_field": {
-      //     "custom_field_options": [
-      //       {"name": "Apple Pie", "value": "apple"},
-      //       {"name": "Pecan Pie", "value": "pecan"}
-      //     ]
-      
-      // }})
     }catch(error){
       alert(error)
     }
   }
 
+  const updateCustomerDetailInList = (list) => {
+    axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}/${formData.customer}`).then(response => {
+      if(response.status === 200){
+        
+        list.push({
+            name: response.data["name"],
+            value: formData.customer
+        })
+
+      }
+      updateTicketField(list)
+    }).catch((e) =>{alert(e)})
+  }
+
+
+  const updateTicketField = (list) => {
+      axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
+        "ticket_field": {
+          "custom_field_options": list
+      }},{
+          headers: {
+            'Authorization': `Bearer ${TOKEN}`
+          }
+        }).catch((e) =>{alert(e)})
+
+        createTicket()
+  }
+
+  const createTicket = () => {
+
+  }
+
+  
   return (
     <div className='container my-4'>
       <h1>Create Ticket</h1>
