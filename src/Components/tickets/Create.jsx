@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import axios from 'axios'
 import { CHANNEL_BASE_URL, TICKET_BASE_URL, CUSTOMERS_URI, ORDERS_URI, TICKET_FIELD_URI, TOKEN } from '../../Utils/apiURL';
+import { CreateContext } from '../context/CreateContext';
 
 
 const Create = () => {
-  const [customerData, setCustomerData] = useState([]);
-  const [orderData, setOrderData] = useState([])
+  const {customerData, getOrdersForCustomer, orderData, createTicketProcess} = useContext(CreateContext)
   const [isVisible, setIsVisible] = useState(false)
-
   const [formData, setFormData] = useState({
     subject: "",
     comment: "",
@@ -15,15 +14,7 @@ const Create = () => {
     customer: ""
   })
 
-  useEffect(() => {
-        axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}`).then(response => {
-          if(response.status === 200){
-            setCustomerData(response.data);
-          }
-        }).catch((e) =>{alert(e)})
-  },[]);
-
-  const fetchOrders = (e) => {
+  const fetchOrders = async (e) => {
     if(e.target.value === ''){
       setFormData({
         ...formData, 
@@ -31,19 +22,14 @@ const Create = () => {
       })
       setIsVisible(false)
     }else{
-      axios.get(`${CHANNEL_BASE_URL}/${CUSTOMERS_URI}/${e.target.value}${ORDERS_URI}`).then(response => {
-        if(response.status === 200){
-          setOrderData(response.data);
-        }
-      }).catch((e) =>{alert("haha",e)})
+      getOrdersForCustomer(e.target.value)
       setFormData({
         ...formData, 
         [e.target.name]: e.target.value,
       })
       setIsVisible(true)
     }
-
-  }
+}
 
   const priorityChange = (e) => {
     if(e.target.value === ''){
@@ -68,64 +54,11 @@ const Create = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    var list = []
-    try{
-      const ticketFieldBody = await
-       axios.get(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`,{
-        headers: {
-            'Authorization': `Bearer ${TOKEN}`
-        }
-      })
-
-      if(ticketFieldBody.status === 200){
-        ticketFieldBody.data.ticket_field.custom_field_options.map(customer => {
-          let customerObj = {
-            name: customer.name,
-            value: customer.value
-          }
-    
-          list.push(customerObj)
-         })
-         updateCustomerDetailInList(list)
-      }
-    }catch(error){
-      alert(error)
-    }
-  }
-
-  const updateCustomerDetailInList = (list) => {
-    axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}/${formData.customer}`).then(response => {
-      if(response.status === 200){
-        
-        list.push({
-            name: response.data["name"],
-            value: formData.customer
-        })
-
-      }
-      updateTicketField(list)
-    }).catch((e) =>{alert(e)})
-  }
-
-
-  const updateTicketField = (list) => {
-      axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
-        "ticket_field": {
-          "custom_field_options": list
-      }},{
-          headers: {
-            'Authorization': `Bearer ${TOKEN}`
-          }
-        }).catch((e) =>{alert(e)})
-
-        createTicket()
-  }
-
-  const createTicket = () => {
+    createTicketProcess(formData)
 
   }
 
-  
+
   return (
     <div className='container my-4'>
       <h1>Create Ticket</h1>
