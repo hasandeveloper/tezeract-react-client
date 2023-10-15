@@ -33,30 +33,38 @@ export const CreateContext = createContext()
                 createTicket(list, formData)
             }
         }catch(error){
-            alert(error)
+            alert("error from update ticket field",error)
         }
 
   
           
     }
   
-    const createTicket = (list, formData) => {
-        axios.post(`${TICKET_BASE_URL}/${TICKET_URI}`, {
-            "ticket": {
-              "comment": {
-                "body": formData.comment
-              },
-              "custom_fields": [{"id": 4398063301247, "value": list[list.length - 1].value}],
-              "priority": formData.priority,
-              "subject": formData.subject
-            }
-          },{
-              headers: {
-                'Authorization': `Bearer ${TOKEN}`
-              }
-            }).catch((e) =>{
-                alert(e)
+    const createTicket = async(list, formData) => {
+        let response
+        try{
+            response = await
+            axios.post(`${TICKET_BASE_URL}/${TICKET_URI}`, {
+                "ticket": {
+                  "comment": {
+                    "body": formData.comment
+                  },
+                  "custom_fields": [{"id": 4398063301247, "value": list[list.length - 1].value}],
+                  "priority": formData.priority,
+                  "subject": formData.subject
+                }
+              },{
+                  headers: {
+                    'Authorization': `Bearer ${TOKEN}`
+                  }
             })
+            if(response.status === 201){
+                alert("Created ticket")
+            }
+        }catch(error){
+            alert("error from create ticket ",error)
+        }
+
     }
 
     export const CreateContextProvider = ({children}) => {
