@@ -1,6 +1,6 @@
 import React, { useReducer, createContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { CHANNEL_BASE_URL, TICKET_BASE_URL, CUSTOMERS_URI, ORDERS_URI, TICKET_FIELD_URI, TOKEN } from '../../Utils/apiURL';
+import { CHANNEL_BASE_URL, TICKET_BASE_URL, CUSTOMERS_URI, ORDERS_URI, TICKET_FIELD_URI, TOKEN, TICKET_URI } from '../../Utils/apiURL';
 
 export const CreateContext = createContext()
 
@@ -13,25 +13,52 @@ export const CreateContext = createContext()
                 value: formData.customer
             })
         }
-          updateTicketField(list)
+          updateTicketField(list, formData)
         }).catch((e) =>{alert(e)})
     }
 
-    const updateTicketField = (list) => {
-        axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
-          "ticket_field": {
-            "custom_field_options": list
-        }},{
-            headers: {
-              'Authorization': `Bearer ${TOKEN}`
+    const updateTicketField = async(list, formData) => {
+        let response
+        try{
+            response = await
+            axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
+                "ticket_field": {
+                  "custom_field_options": list
+              }},{
+                  headers: {
+                    'Authorization': `Bearer ${TOKEN}`
+                  }
+            })
+            if(response.status === 200){
+                createTicket(list, formData)
             }
-          }).catch((e) =>{alert(e)})
+            // debugger
+        }catch(error){
+            alert(error)
+        }
+
   
-          createTicket(list)
+          
     }
   
-    const createTicket = (list) => {
-        debugger;
+    const createTicket = (list, formData) => {
+        // debugger;
+        axios.post(`${TICKET_BASE_URL}/${TICKET_URI}`, {
+            "ticket": {
+              "comment": {
+                "body": formData.comment
+              },
+              "custom_fields": [{"id": 4398063301247, "value": list[list.length - 1].value}],
+              "priority": formData.priority,
+              "subject": formData.subject
+            }
+          },{
+              headers: {
+                'Authorization': `Bearer ${TOKEN}`
+              }
+            }).catch((e) =>{
+                alert(e)
+            })
     }
 
     export const CreateContextProvider = ({children}) => {
