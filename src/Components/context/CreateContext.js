@@ -32,7 +32,6 @@ export const CreateContext = createContext()
             if(response.status === 200){
                 createTicket(list, formData)
             }
-            // debugger
         }catch(error){
             alert(error)
         }
@@ -42,7 +41,6 @@ export const CreateContext = createContext()
     }
   
     const createTicket = (list, formData) => {
-        // debugger;
         axios.post(`${TICKET_BASE_URL}/${TICKET_URI}`, {
             "ticket": {
               "comment": {
