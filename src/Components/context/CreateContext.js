@@ -15,134 +15,131 @@ export const CreateContext = createContext()
     }
   }
 
+  export const CreateContextProvider = ({children}) => {
+      const [customerData, setCustomerData] = useState([])
+      const [orderData, setOrderData] = useState([])
+      const [state, dispatch] = useReducer(createReducer, INITIAL_STATE)
 
-    export const CreateContextProvider = ({children}) => {
-        const [customerData, setCustomerData] = useState([])
-        const [orderData, setOrderData] = useState([])
-        const [state, dispatch] = useReducer(createReducer, INITIAL_STATE)
 
+      useEffect(() => {
+          axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}`).then(response => {
+            if(response.status === 200){
+              setCustomerData(response.data)
+            }
+          }).catch((e) =>{alert("error from get customers",e)})
+      },[]);
 
-        useEffect(() => {
-            axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}`).then(response => {
+      const getOrdersForCustomer = (customerId) =>{
+          axios.get(`${CHANNEL_BASE_URL}/${CUSTOMERS_URI}/${customerId}${ORDERS_URI}`).then(response => {
               if(response.status === 200){
-                setCustomerData(response.data)
+                  setOrderData(response.data)
               }
-            }).catch((e) =>{alert("error from get customers",e)})
-        },[]);
+            }).catch((e) =>{alert("error from fetch order",e)})
+      } 
 
-        const getOrdersForCustomer = (customerId) =>{
-            axios.get(`${CHANNEL_BASE_URL}/${CUSTOMERS_URI}/${customerId}${ORDERS_URI}`).then(response => {
-                if(response.status === 200){
-                    setOrderData(response.data)
-                }
-              }).catch((e) =>{alert("error from fetch order",e)})
-        } 
-
-        const createTicketProcess = async(FormData) => {
-            var list = []
-            try{
-              const ticketFieldBody = await
-               axios.get(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`,{
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`
-                }
-              })
-
-              if(ticketFieldBody.status === 200){
-                ticketFieldBody.data.ticket_field.custom_field_options.map(customer => {
-                  let customerObj = {
-                    name: customer.name,
-                    value: customer.value
-                  }
-            
-                  list.push(customerObj)
-                 })
-                 updateCustomerDetailInList(list,FormData)
+      const createTicketProcess = async(FormData) => {
+          var list = []
+          try{
+            const ticketFieldBody = await
+              axios.get(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`,{
+              headers: {
+                  'Authorization': `Bearer ${TOKEN}`
               }
-            }catch(error){
-              alert(error)
+            })
+
+            if(ticketFieldBody.status === 200){
+              ticketFieldBody.data.ticket_field.custom_field_options.map(customer => {
+                let customerObj = {
+                  name: customer.name,
+                  value: customer.value
+                }
+          
+                list.push(customerObj)
+                })
+                updateCustomerDetailInList(list,FormData)
             }
-        }
-
-        const updateCustomerDetailInList = (list, formData) => {
-        
-          axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}/${formData.customer}`).then(response => {
-          if(response.status === 200){
-              list.push({
-                  name: response.data["name"],
-                  value: formData.customer
-              })
+          }catch(error){
+            alert(error)
           }
-            updateTicketField(list, formData)
-          }).catch((e) =>{alert(e)})
-        }
-  
-        const updateTicketField = async(list, formData) => {
-            let response
-            try{
-                response = await
-                axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
-                    "ticket_field": {
-                      "custom_field_options": list
-                  }},{
-                      headers: {
-                        'Authorization': `Bearer ${TOKEN}`
-                      }
-                })
-                if(response.status === 200){
-                    createTicket(list, formData)
-                }
-            }catch(error){
-                alert("error from update ticket field",error)
-            }
-    
-      
-              
-        }
-    
-        const createTicket = async(list, formData) => {
-            let response
-            try{
-                response = await
-                axios.post(`${TICKET_BASE_URL}/${TICKET_URI}`, {
-                    "ticket": {
-                      "comment": {
-                        "body": formData.comment
-                      },
-                      "custom_fields": [{"id": 4398063301247, "value": list[list.length - 1].value}],
-                      "priority": formData.priority,
-                      "subject": formData.subject
-                    }
-                  },{
-                      headers: {
-                        'Authorization': `Bearer ${TOKEN}`
-                      }
-                })
-                if(response.status === 201){
-                  
-                    alert("Created ticket")
-                    // debugger
-                    let ticket = {
-                      "subject": formData.subject,
-                      "comment": formData.comment,
-                      "priority": formData.priority,
-                      "customer": list[list.length - 1].name
-                    }
-                    dispatch({
-                      type: "ADD_TICKET",
-                      payload: ticket
-                    })
-                }
-            }catch(error){
-                alert("error from create ticket ",error)
-            }
-    
-        }
+      }
 
-        return (
-            <>
-                <CreateContext.Provider value={{customerData, getOrdersForCustomer, orderData, createTicketProcess, state}}>{children}</CreateContext.Provider>
-            </>
-        )
-    }
+      const updateCustomerDetailInList = (list, formData) => {
+      
+        axios.get(`${CHANNEL_BASE_URL}${CUSTOMERS_URI}/${formData.customer}`).then(response => {
+        if(response.status === 200){
+            list.push({
+                name: response.data["name"],
+                value: formData.customer
+            })
+        }
+          updateTicketField(list, formData)
+        }).catch((e) =>{alert(e)})
+      }
+
+      const updateTicketField = async(list, formData) => {
+          let response
+          try{
+              response = await
+              axios.put(`${TICKET_BASE_URL}/${TICKET_FIELD_URI}`, {
+                  "ticket_field": {
+                    "custom_field_options": list
+                }},{
+                    headers: {
+                      'Authorization': `Bearer ${TOKEN}`
+                    }
+              })
+              if(response.status === 200){
+                  createTicket(list, formData)
+              }
+          }catch(error){
+              alert("error from update ticket field",error)
+          }
+  
+    
+            
+      }
+  
+      const createTicket = async(list, formData) => {
+          let response
+          try{
+              response = await
+              axios.post(`${TICKET_BASE_URL}/${TICKET_URI}`, {
+                  "ticket": {
+                    "comment": {
+                      "body": formData.comment
+                    },
+                    "custom_fields": [{"id": 4398063301247, "value": list[list.length - 1].value}],
+                    "priority": formData.priority,
+                    "subject": formData.subject
+                  }
+                },{
+                    headers: {
+                      'Authorization': `Bearer ${TOKEN}`
+                    }
+              })
+              if(response.status === 201){
+                  alert("Created ticket")
+                  let ticket = {
+                    "subject": formData.subject,
+                    "comment": formData.comment,
+                    "priority": formData.priority,
+                    "customer": list[list.length - 1].name
+                  }
+                  dispatch({
+                    type: "ADD_TICKET",
+                    payload: ticket
+                  })
+              }
+          }catch(error){
+              alert("error from create ticket ",error)
+          }
+  
+      }
+
+      return (
+          <>
+              <CreateContext.Provider value={{customerData, getOrdersForCustomer, orderData, createTicketProcess, state}}>{children}</CreateContext.Provider>
+          </>
+      )
+  }
 
