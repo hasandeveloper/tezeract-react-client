@@ -4,15 +4,15 @@ import Create from './tickets/Create';
 import List from './tickets/List';
 import { CreateContextProvider } from './context/CreateContext';
 
+
 const Home = () => {
   const navigate = useNavigate();
   return (
     <>
     <CreateContextProvider>
       <Create/>
+      <List/>
     </CreateContextProvider>
-    
-    <List/>
     </>
   )
 }
